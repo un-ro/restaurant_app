@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
         title: 'Restaurant App',
         theme: ThemeData(
           primarySwatch: Colors.green,
+          splashColor: Colors.lightGreen,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         debugShowCheckedModeBanner: false,
