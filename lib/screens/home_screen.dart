@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/screens/detail_screen.dart';
 
@@ -10,7 +11,17 @@ class HomePage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Center(
-            child: Text('Restaurant List'),
+            child: Text(
+              'Go Nakam',
+              style: GoogleFonts.pacifico(fontSize: 30),
+            ),
+          ),
+          bottom: PreferredSize(
+            child: Text(
+              'No worries for tummies',
+              style: GoogleFonts.pacifico(color: Colors.white),
+            ),
+            preferredSize: Size.fromHeight(0),
           ),
         ),
         body: FutureBuilder<String>(
@@ -38,14 +49,34 @@ class HomePage extends StatelessWidget {
         width: 100,
       ),
       title: Text(restaurant.name),
-      subtitle: Row(
-        children: <Widget>[
-          Icon(
-            Icons.room,
-            color: Colors.red,
-            semanticLabel: 'Location',
+      subtitle: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Icon(
+                Icons.room,
+                size: 16,
+                color: Colors.red,
+                semanticLabel: 'Location',
+              ),
+              Text(restaurant.city),
+            ],
           ),
-          Text(restaurant.city),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              Icon(
+                Icons.star_rate_sharp,
+                size: 16,
+                color: Colors.yellow,
+                semanticLabel: 'Rating',
+              ),
+              Text(restaurant.rating.toString()),
+            ],
+          )
         ],
       ),
       onTap: () {
