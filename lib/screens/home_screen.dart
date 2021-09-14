@@ -3,8 +3,33 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/screens/detail_screen.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   static const String routeName = '/home';
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  late AnimationController controller;
+
+  @override
+  void initState() {
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..addListener(() {
+        setState(() {});
+      });
+    controller.repeat(reverse: true);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +53,36 @@ class HomePage extends StatelessWidget {
           future: DefaultAssetBundle.of(context)
               .loadString('assets/local_restaurant.json'),
           builder: (context, snapshot) {
-            final List<Restaurant> restaurants =
-                parseRestaurants(snapshot.data);
-            return ListView.builder(
-              itemCount: restaurants.length,
-              itemBuilder: (context, index) {
-                return _buildItem(context, restaurants[index]);
-              },
-            );
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Center(
+                child: CircularProgressIndicator(
+                  value: controller.value,
+                  semanticsLabel: 'Circular progress indicator',
+                ),
+              );
+            } else {
+              if (snapshot.hasData) {
+                final List<Restaurant> restaurants =
+                    parseRestaurants(snapshot.data);
+                return ListView.builder(
+                  itemCount: restaurants.length,
+                  itemBuilder: (context, index) {
+                    return _buildItem(context, restaurants[index]);
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              } else {
+                return Center(
+                  child: CircularProgressIndicator(
+                    value: controller.value,
+                    semanticsLabel: 'Circular progress indicator',
+                  ),
+                );
+              }
+            }
           },
         ));
   }
