@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/screens/detail_screen.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class HomePage extends StatefulWidget {
   static const String routeName = '/home';
@@ -36,9 +37,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Scaffold(
         appBar: AppBar(
           title: Center(
-            child: Text(
-              'Go Nakam',
-              style: GoogleFonts.pacifico(fontSize: 30),
+            child: AnimatedTextKit(
+              animatedTexts: [
+                ColorizeAnimatedText(
+                  'GO NAKAM',
+                  textStyle: TextStyle(
+                    fontSize: 30.0,
+                    fontFamily: GoogleFonts.poppins().fontFamily,
+                  ),
+                  colors: [
+                    Colors.red,
+                    Colors.blue,
+                    Colors.green,
+                    Colors.yellow,
+                    Colors.orange,
+                    Colors.purple,
+                  ],
+                ),
+              ],
+              isRepeatingAnimation: true,
             ),
           ),
           bottom: PreferredSize(
