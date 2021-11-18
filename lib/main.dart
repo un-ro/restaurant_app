@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/screens/detail_screen.dart';
-import 'package:restaurant_app/screens/home_screen.dart';
+import 'package:provider/provider.dart';
 
-import 'models/restaurant.dart';
+import 'provider/restaurant_provider.dart';
+import 'ui/ui.dart';
+import 'utils/const.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(GoNakamApp());
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class GoNakamApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Restaurant App',
+    return ChangeNotifierProvider<RestaurantProvider>(
+      create: (_) => RestaurantProvider(),
+      child: MaterialApp(
+        title: APP_NAME,
         theme: ThemeData(
           primarySwatch: Colors.green,
           splashColor: Colors.lightGreen,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: true,
         initialRoute: HomePage.routeName,
         routes: {
           HomePage.routeName: (context) => HomePage(),
           DetailPage.routeName: (context) => DetailPage(
-                restaurant:
-                    ModalRoute.of(context)?.settings.arguments as Restaurant,
-              ),
-        });
+              restaurantId:
+                  ModalRoute.of(context)?.settings.arguments as String),
+        },
+      ),
+    );
   }
 }
