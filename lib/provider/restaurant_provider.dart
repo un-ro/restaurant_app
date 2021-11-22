@@ -10,31 +10,30 @@ class RestaurantProvider with ChangeNotifier {
   final _apiService = ApiService();
 
   RestaurantProvider() {
-    fetchRestaurants('list');
+    fetchRestaurants();
   }
 
   late RestaurantsResult _restaurantsResult;
+  late RestaurantsResult _searchResult;
   late DetailResult _restaurantResult;
   late APIState _state;
+  APIState _searchState = APIState.NoQuery;
   late String _message;
 
   String get message => _message;
   RestaurantsResult get result => _restaurantsResult;
+  RestaurantsResult get searchResult => _searchResult;
   DetailResult get restaurantDetail => _restaurantResult;
   APIState get state => _state;
+  APIState get searchState => _searchState;
 
   // Fetch for List and Search
-  Future<dynamic> fetchRestaurants(String request) async {
+  Future<dynamic> fetchRestaurants() async {
     try {
       _state = APIState.Loading;
       notifyListeners();
 
-      late RestaurantsResult response;
-      if (request == 'list') {
-        response = await _apiService.getRestaurants();
-      } else {
-        response = await _apiService.getSearchRestaurants(_searchQuery);
-      }
+      final response = await _apiService.getRestaurants();
 
       if (response.restaurants.isEmpty) {
         _state = APIState.NoData;
@@ -47,6 +46,30 @@ class RestaurantProvider with ChangeNotifier {
       }
     } catch (e) {
       _state = APIState.Error;
+      notifyListeners();
+      return _message = ERROR_RESPONSE;
+    }
+  }
+
+  // Fetch for List and Search
+  Future<dynamic> fetchSearch() async {
+    try {
+      _searchState = APIState.Loading;
+      notifyListeners();
+
+      final response = await _apiService.getSearchRestaurants(_searchQuery);
+
+      if (response.restaurants.isEmpty) {
+        _searchState = APIState.NoData;
+        notifyListeners();
+        return _message = EMPTY_RESPONSE;
+      } else {
+        _searchState = APIState.HasData;
+        notifyListeners();
+        return _searchResult = response;
+      }
+    } catch (e) {
+      _searchState = APIState.Error;
       notifyListeners();
       return _message = ERROR_RESPONSE;
     }

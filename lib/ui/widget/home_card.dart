@@ -84,10 +84,11 @@ class HomeCard extends StatelessWidget {
           onTap: () {
             Provider.of<RestaurantProvider>(context, listen: false)
                 .fetchRestaurant(restaurant.id);
-            Navigator.pushNamed(
+            Navigator.push(
               context,
-              DetailPage.routeName,
-              arguments: restaurant.id,
+              MaterialPageRoute(
+                builder: (context) => DetailPage(restaurantId: restaurant.id),
+              ),
             );
           },
         ),
