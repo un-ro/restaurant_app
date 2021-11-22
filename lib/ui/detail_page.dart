@@ -11,7 +11,6 @@ import 'package:restaurant_app/utils/theme.dart';
 import 'widget/exception_card.dart';
 
 class DetailPage extends StatelessWidget {
-  static const routeName = '/detail';
   final String restaurantId;
 
   const DetailPage({
