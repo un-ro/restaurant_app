@@ -1,102 +1,89 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant_app/data/model/response_model.dart';
-import 'package:restaurant_app/provider/restaurant_provider.dart';
+import 'package:restaurant_app/data/repository_provider.dart';
 import 'package:restaurant_app/ui/widget/detail_section.dart';
+import 'package:restaurant_app/ui/widget/exception_card.dart';
 import 'package:restaurant_app/ui/widget/menu_grid.dart';
 import 'package:restaurant_app/utils/const.dart';
 import 'package:restaurant_app/utils/theme.dart';
 
-import 'widget/exception_card.dart';
-
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   final String restaurantId;
 
-  const DetailPage({
-    required this.restaurantId,
-  });
+  const DetailPage({required this.restaurantId});
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  bool _isFavorite = false;
+  int _selectedIndex = 0;
+
+  initState() {
+    super.initState();
+  }
+
+  Widget _listWidget(BuildContext context, DetailRestaurant restaurant) {
+    final _list = <Widget>[
+      DetailSection(restaurant: restaurant),
+      MenuGrid(items: restaurant.menus.foods, type: "food"),
+      MenuGrid(items: restaurant.menus.drinks, type: "drink"),
+      _buildListReview(context, restaurant.customerReviews),
+    ];
+    return _list.elementAt(_selectedIndex);
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<RestaurantProvider>(
+      appBar: AppBar(
+        title: Text(APP_NAME, style: appTitleStyle),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.favorite_rounded),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: Consumer<Repository>(
         builder: (context, provider, _) {
-          if (provider.state == APIState.Loading) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (provider.state == APIState.NoData) {
-            return ExceptionCard(
-              assetPath: 'assets/lottie/empty-box.json',
-              message: provider.message,
-            );
-          } else if (provider.state == APIState.Error) {
+          if (provider.state == APIState.LOADING) {
+            return Center(child: CircularProgressIndicator());
+          } else if (provider.state == APIState.DONE) {
+            final restaurant = provider.detailResult.restaurant;
+            return _listWidget(context, restaurant);
+          } else if (provider.state == APIState.ERROR) {
             return ExceptionCard(
               assetPath: 'assets/lottie/error-cone.json',
               message: provider.message,
             );
           } else {
-            return _buildDetailPage(
-              context,
-              provider.restaurantDetail.restaurant,
-            );
+            return Container();
           }
         },
       ),
-    );
-  }
-
-  Widget _buildDetailPage(BuildContext context, DetailRestaurant restaurant) {
-    return DefaultTabController(
-      length: 4,
-      child: NestedScrollView(
-        headerSliverBuilder: (context, isScrolled) {
-          return [
-            SliverAppBar(
-              pinned: true,
-              expandedHeight: 200,
-              flexibleSpace: FlexibleSpaceBar(
-                background: CachedNetworkImage(
-                  imageUrl: MEDIUM_IMAGE + restaurant.pictureId,
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-              title: Text(
-                Provider.of<RestaurantProvider>(context).getTitle(),
-                style: titleStyle,
-              ),
-              centerTitle: true,
-              actions: [
-                IconButton(
-                    onPressed: () => _showNextSubDialog(context),
-                    icon: Icon(Icons.favorite_rounded))
-              ],
-              bottom: TabBar(
-                onTap: (index) {
-                  Provider.of<RestaurantProvider>(context, listen: false)
-                      .setIndex(index);
-                },
-                tabs: [
-                  Tab(icon: Icon(Icons.storefront_rounded)),
-                  Tab(icon: Icon(Icons.restaurant_menu_rounded)),
-                  Tab(icon: Icon(Icons.local_bar_rounded)),
-                  Tab(icon: Icon(Icons.reviews_rounded)),
-                ],
-              ),
-            )
-          ];
-        },
-        body: TabBarView(
-          children: [
-            DetailSection(restaurant: restaurant),
-            MenuGrid(
-              items: restaurant.menus.foods,
-              type: "food",
-            ),
-            MenuGrid(items: restaurant.menus.drinks, type: "drink"),
-            _buildListReview(context, restaurant.customerReviews),
-          ],
+      bottomNavigationBar: Container(
+        height: 75,
+        width: MediaQuery.of(context).size.width,
+        child: BottomNavigationBar(
+          items: detailBottomNav,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          showUnselectedLabels: false,
+          selectedItemColor: Colors.green,
         ),
       ),
     );
@@ -115,25 +102,6 @@ class DetailPage extends StatelessWidget {
           subtitle: Text(review.review),
         );
       },
-    );
-  }
-
-  Future<void> _showNextSubDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => AlertDialog(
-        title: const Text('WIP Feature'),
-        content: Text('This feature still in work'),
-        actions: [
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant_app/ui/main_page.dart';
-import 'package:restaurant_app/utils/theme.dart';
 
-import 'provider/restaurant_provider.dart';
+import 'data/repository_provider.dart';
 import 'utils/const.dart';
 
 void main() => runApp(GoNakamApp());
@@ -11,8 +10,8 @@ void main() => runApp(GoNakamApp());
 class GoNakamApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<RestaurantProvider>(
-      create: (_) => RestaurantProvider(),
+    return ChangeNotifierProvider<Repository>(
+      create: (_) => Repository(),
       child: MaterialApp(
         title: APP_NAME,
         theme: ThemeData(

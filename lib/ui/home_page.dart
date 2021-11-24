@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:restaurant_app/ui/widget/exception_card.dart';
 
+import 'widget/exception_card.dart';
+import '../data/repository_provider.dart';
 import '../data/model/response_model.dart';
-import '../provider/restaurant_provider.dart';
 import 'widget/home_card.dart';
 
 class HomePage extends StatelessWidget {
@@ -11,21 +11,21 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<RestaurantProvider>(
-      builder: (context, state, _) {
-        if (state.state == APIState.Loading) {
+    return Consumer<Repository>(
+      builder: (context, provider, _) {
+        if (provider.state == APIState.LOADING) {
           return Center(child: CircularProgressIndicator());
-        } else if (state.state == APIState.HasData) {
-          return _buildList(context, state.result.restaurants);
-        } else if (state.state == APIState.NoData) {
+        } else if (provider.state == APIState.DONE) {
+          return _buildList(context, provider.homeResult.restaurants);
+        } else if (provider.state == APIState.EMPTY) {
           return ExceptionCard(
             assetPath: 'assets/lottie/empty-box.json',
-            message: state.message,
+            message: provider.message,
           );
-        } else if (state.state == APIState.Error) {
+        } else if (provider.state == APIState.ERROR) {
           return ExceptionCard(
             assetPath: 'assets/lottie/error-cone.json',
-            message: state.message,
+            message: provider.message,
           );
         } else {
           return Container();
