@@ -29,8 +29,7 @@ class DatabaseHelper {
             id TEXT PRIMARY KEY,
             pictureId TEXT,
             name TEXT,
-            city TEXT,
-            rating TEXT
+            city TEXT
             )''',
         );
       },
@@ -44,7 +43,6 @@ class DatabaseHelper {
     final Database db = await database;
     await db.insert(_tableName, favorite.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
-    print('Data saved');
   }
 
   // Get Favorite
