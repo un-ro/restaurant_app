@@ -30,7 +30,7 @@ class DatabaseHelper {
             pictureId TEXT,
             name TEXT,
             city TEXT,
-            rating TEXT,
+            rating TEXT
             )''',
         );
       },
@@ -56,7 +56,7 @@ class DatabaseHelper {
   }
 
   // Get by Id Favorite
-  Future<Favorite> getFavoriteById(String id) async {
+  Future<Favorite?> getFavoriteById(String id) async {
     final Database db = await database;
     List<Map<String, dynamic>> result = await db.query(
       _tableName,
@@ -64,7 +64,11 @@ class DatabaseHelper {
       whereArgs: [id],
     );
 
-    return result.map((fav) => Favorite.fromMap(fav)).first;
+    if (result.isEmpty) {
+      return null;
+    } else {
+      return result.map((fav) => Favorite.fromMap(fav)).first;
+    }
   }
 
   // Delete Favorite
