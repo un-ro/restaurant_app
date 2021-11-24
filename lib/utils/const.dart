@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-
 const String APP_NAME = 'GoNakam';
-const String APP_VERSION = '2.0.0';
+const String APP_VERSION = '3.0.0';
 
 // API Related
 const String BASE_URL = 'https://restaurant-api.dicoding.dev';
@@ -13,34 +11,3 @@ const String ERROR_RESPONSE =
     'Something went wrong, check your internet connection';
 const String EMPTY_RESPONSE =
     'Empty Result from server, check again your search';
-
-List<BottomNavigationBarItem> detailBottomNav = [
-  BottomNavigationBarItem(
-    icon: Icon(
-      Icons.storefront_rounded,
-      color: Colors.green,
-    ),
-    label: 'Restaurant',
-  ),
-  BottomNavigationBarItem(
-    icon: Icon(
-      Icons.restaurant_menu_rounded,
-      color: Colors.green,
-    ),
-    label: 'Foods Menu',
-  ),
-  BottomNavigationBarItem(
-    icon: Icon(
-      Icons.local_bar_rounded,
-      color: Colors.green,
-    ),
-    label: 'Drinks Menu',
-  ),
-  BottomNavigationBarItem(
-    icon: Icon(
-      Icons.reviews_rounded,
-      color: Colors.green,
-    ),
-    label: 'Review',
-  ),
-];
