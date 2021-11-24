@@ -16,8 +16,8 @@ class Repository with ChangeNotifier {
   Repository() {
     _databaseHelper = DatabaseHelper();
     _apiService = ApiService();
-    _getFavorites();
     fetchRestaurants();
+    _getFavorites();
   }
 
   late RestaurantsResult _homeResult;
@@ -115,10 +115,21 @@ class Repository with ChangeNotifier {
       await _databaseHelper.getFavoriteById(id);
 
   // Database add Favorite
-  Future<void> addFavorite(Favorite favorite) async =>
-      await _databaseHelper.addFavorite(favorite);
+  Future<void> addFavorite(DetailRestaurant restaurant) async {
+    final favorite = Favorite(
+      id: restaurant.id,
+      pictureId: restaurant.pictureId,
+      name: restaurant.name,
+      city: restaurant.city,
+      rating: restaurant.rating,
+    );
+    await _databaseHelper.addFavorite(favorite);
+    _getFavorites();
+  }
 
   // Database delete Favorite
-  void removeFavorite(String id) async =>
-      await _databaseHelper.removeFavorite(id);
+  void removeFavorite(String id) async {
+    await _databaseHelper.removeFavorite(id);
+    _getFavorites();
+  }
 }

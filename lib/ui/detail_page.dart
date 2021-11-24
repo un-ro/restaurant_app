@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:restaurant_app/data/model/response_model.dart';
 import 'package:restaurant_app/data/repository_provider.dart';
 import 'package:restaurant_app/ui/widget/detail_section.dart';
-import 'package:restaurant_app/ui/widget/exception_card.dart';
+import 'package:restaurant_app/ui/widget/exception_scaffold.dart';
 import 'package:restaurant_app/ui/widget/menu_grid.dart';
 import 'package:restaurant_app/utils/const.dart';
 import 'package:restaurant_app/utils/theme.dart';
+
+import 'widget/component.dart';
 
 class DetailPage extends StatefulWidget {
   final String restaurantId;
@@ -21,8 +23,18 @@ class _DetailPageState extends State<DetailPage> {
   bool _isFavorite = false;
   int _selectedIndex = 0;
 
-  initState() {
+  @override
+  void initState() {
     super.initState();
+    Provider.of<Repository>(context, listen: false)
+        .getFavoriteById(widget.restaurantId)
+        .then((value) {
+      if (value != null) {
+        setState(() {
+          _isFavorite = true;
+        });
+      }
+    });
   }
 
   Widget _listWidget(BuildContext context, DetailRestaurant restaurant) {
@@ -48,43 +60,44 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<Repository>(
+      builder: (context, provider, _) {
+        if (provider.state == APIState.LOADING) {
+          return ExceptionScaffold(state: provider.state);
+        } else if (provider.state == APIState.DONE) {
+          final restaurant = provider.detailResult.restaurant;
+          return _buildDetailPage(context, restaurant);
+        } else if (provider.state == APIState.ERROR) {
+          return ExceptionScaffold(
+            state: provider.state,
+            message: provider.message,
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+
+  Widget _buildDetailPage(BuildContext context, DetailRestaurant restaurant) {
     return Scaffold(
       appBar: AppBar(
         title: Text(APP_NAME, style: appTitleStyle),
         actions: [
           IconButton(
-            icon: Icon(Icons.favorite_rounded),
-            onPressed: () {},
+            icon: _isFavorite
+                ? Icon(Icons.favorite_rounded, color: Colors.red)
+                : Icon(Icons.favorite_border_rounded),
+            onPressed: () => _onFavorite(context, restaurant),
           ),
         ],
       ),
-      body: Consumer<Repository>(
-        builder: (context, provider, _) {
-          if (provider.state == APIState.LOADING) {
-            return Center(child: CircularProgressIndicator());
-          } else if (provider.state == APIState.DONE) {
-            final restaurant = provider.detailResult.restaurant;
-            return _listWidget(context, restaurant);
-          } else if (provider.state == APIState.ERROR) {
-            return ExceptionCard(
-              assetPath: 'assets/lottie/error-cone.json',
-              message: provider.message,
-            );
-          } else {
-            return Container();
-          }
-        },
-      ),
-      bottomNavigationBar: Container(
-        height: 75,
-        width: MediaQuery.of(context).size.width,
-        child: BottomNavigationBar(
-          items: detailBottomNav,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          showUnselectedLabels: false,
-          selectedItemColor: Colors.green,
-        ),
+      body: _listWidget(context, restaurant),
+      bottomNavigationBar: BottomNavigationBar(
+        items: detailBottomNav,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Colors.green,
       ),
     );
   }
@@ -103,5 +116,20 @@ class _DetailPageState extends State<DetailPage> {
         );
       },
     );
+  }
+
+  void _onFavorite(BuildContext context, DetailRestaurant restaurant) {
+    if (_isFavorite) {
+      // If true -> remove
+      Provider.of<Repository>(context, listen: false)
+          .removeFavorite(widget.restaurantId);
+    } else {
+      // If false -> add
+      Provider.of<Repository>(context, listen: false).addFavorite(restaurant);
+    }
+    // Draw again page.
+    setState(() {
+      _isFavorite = !_isFavorite;
+    });
   }
 }
