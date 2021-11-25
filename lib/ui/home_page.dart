@@ -62,22 +62,19 @@ class _HomePageState extends State<HomePage> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         padding: const EdgeInsets.all(8.0),
-        child: ChangeNotifierProvider(
-          create: (_) => Repository().fetchRestaurants(),
-          child: Consumer<Repository>(
-            builder: (context, provider, _) {
-              switch (provider.homeState) {
-                case APIState.LOADING:
-                  return Center(child: CircularProgressIndicator());
-                case APIState.EMPTY:
-                  return Center(child: Text('Something Wrong'));
-                case APIState.ERROR:
-                  return Center(child: Text('Something Wrong'));
-                case APIState.DONE:
-                  return _buildList(context, provider.homeResult.restaurants);
-              }
-            },
-          ),
+        child: Consumer<Repository>(
+          builder: (context, provider, _) {
+            switch (provider.homeState) {
+              case APIState.LOADING:
+                return Center(child: CircularProgressIndicator());
+              case APIState.EMPTY:
+                return Center(child: Text('Something Wrong'));
+              case APIState.ERROR:
+                return Center(child: Text('Something Wrong'));
+              case APIState.DONE:
+                return _buildList(context, provider.homeResult.restaurants);
+            }
+          },
         ),
       ),
     );

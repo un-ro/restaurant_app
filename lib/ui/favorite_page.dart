@@ -33,11 +33,7 @@ class _FavoritePageState extends State<FavoritePage> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         padding: const EdgeInsets.all(8.0),
-        child: ChangeNotifierProvider<Repository>(
-          lazy: true,
-          create: (context) => Repository().listFavorite(),
-          child: _buildFavorites(context),
-        ),
+        child: _buildFavorites(context),
       ),
     );
   }
@@ -45,6 +41,7 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget _buildFavorites(BuildContext context) {
     return Consumer<Repository>(
       builder: (context, provider, _) {
+        provider.listFavorite();
         if (provider.favorites.isEmpty) {
           return Center(
             child: Column(

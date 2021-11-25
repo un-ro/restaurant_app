@@ -17,6 +17,10 @@ class Repository extends ChangeNotifier {
   Repository() {
     _databaseHelper = DatabaseHelper();
     _apiService = ApiService();
+
+    // Init
+    fetchRestaurants();
+    _getFavorites();
   }
 
   Repository fetchRestaurants() {

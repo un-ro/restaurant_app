@@ -4,7 +4,7 @@ class DateTimeHelper {
   static DateTime format() {
     final now = DateTime.now();
     final dateFormat = DateFormat('y/M/d');
-    final timeSpecific = "7:31:00"; // 11 AM
+    final timeSpecific = "11:00:00"; // 11 AM
     final completeFormat = DateFormat('y/M/d H:m:s');
 
     // Today Schedule
