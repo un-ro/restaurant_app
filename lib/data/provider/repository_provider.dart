@@ -3,10 +3,11 @@ import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/data/database/database_helper.dart';
 import 'package:restaurant_app/data/model/favorite.dart';
 import 'package:restaurant_app/data/model/response_model.dart';
+import 'package:restaurant_app/utils/const.dart';
 
 enum APIState { LOADING, EMPTY, ERROR, DONE }
 
-class Repository with ChangeNotifier {
+class Repository extends ChangeNotifier {
   List<Favorite> _favorites = [];
   late DatabaseHelper _databaseHelper;
   late ApiService _apiService;
@@ -16,91 +17,110 @@ class Repository with ChangeNotifier {
   Repository() {
     _databaseHelper = DatabaseHelper();
     _apiService = ApiService();
-    fetchRestaurants();
+  }
+
+  Repository fetchRestaurants() {
+    _fetchRestaurants();
+    return this;
+  }
+
+  Repository fetchDetail(String id) {
+    fetchRestaurantDetails(id);
+    return this;
+  }
+
+  Repository listFavorite() {
     _getFavorites();
+    return this;
   }
 
   late RestaurantsResult _homeResult;
   late RestaurantsResult _searchResult;
   late DetailResult _detailResult;
-  late APIState _state;
+
+  late APIState _homeState;
+  late APIState _searchState;
+  late APIState _detailState;
+
   late String _message;
 
-  String get message => _message;
   RestaurantsResult get homeResult => _homeResult;
   RestaurantsResult get searchResult => _searchResult;
   DetailResult get detailResult => _detailResult;
-  APIState get state => _state;
+  APIState get homeState => _homeState;
+  APIState get searchState => _searchState;
+  APIState get detailState => _detailState;
+  String get message => _message;
 
   // API get Restaurant List
-  Future<dynamic> fetchRestaurants() async {
+  Future<dynamic> _fetchRestaurants() async {
     try {
-      _state = APIState.LOADING;
+      _homeState = APIState.LOADING;
       notifyListeners();
 
       final response = await _apiService.getRestaurants();
 
       if (response.restaurants.isEmpty) {
-        _state = APIState.EMPTY;
+        _homeState = APIState.EMPTY;
         notifyListeners();
-        return _message = 'No restaurants found';
+        return _message = EMPTY_RESPONSE;
       } else {
-        _state = APIState.DONE;
+        _homeState = APIState.DONE;
         notifyListeners();
         return _homeResult = response;
       }
     } catch (error) {
-      _state = APIState.ERROR;
+      _homeState = APIState.ERROR;
       notifyListeners();
-      return _message = 'Something went wrong, check your connection';
+      return _message = ERROR_RESPONSE;
     }
   }
 
   // API get Search Restaurant
   Future<dynamic> fetchSearch(String query) async {
     try {
-      _state = APIState.LOADING;
+      _searchState = APIState.LOADING;
       notifyListeners();
 
       final response = await _apiService.getSearchRestaurants(query);
 
       if (response.restaurants.isEmpty) {
-        _state = APIState.EMPTY;
+        _searchState = APIState.EMPTY;
         notifyListeners();
-        return _message = 'No restaurants found';
+        return _message = EMPTY_RESPONSE;
       } else {
-        _state = APIState.DONE;
+        _searchState = APIState.DONE;
         notifyListeners();
         return _searchResult = response;
       }
     } catch (error) {
-      _state = APIState.ERROR;
+      _searchState = APIState.ERROR;
       notifyListeners();
-      return _message = 'Something went wrong, check your connection';
+      return _message = ERROR_RESPONSE;
     }
   }
 
   // API get Restaurant Details
   Future<dynamic> fetchRestaurantDetails(String id) async {
     try {
-      _state = APIState.LOADING;
+      _detailState = APIState.LOADING;
       notifyListeners();
 
       final response = await _apiService.getRestaurant(id);
 
       if (response.message == 'restaurant not found') {
-        _state = APIState.EMPTY;
+        _detailState = APIState.EMPTY;
         notifyListeners();
-        return _message = 'No restaurants found';
+        return _message = EMPTY_RESPONSE;
       } else {
-        _state = APIState.DONE;
+        _detailState = APIState.DONE;
         notifyListeners();
         return _detailResult = response;
       }
     } catch (error) {
-      _state = APIState.ERROR;
+      _detailState = APIState.ERROR;
       notifyListeners();
-      return _message = 'Something went wrong, check your connection';
+      return _message = ERROR_RESPONSE;
     }
   }
 
@@ -111,18 +131,11 @@ class Repository with ChangeNotifier {
   }
 
   // Database get Favorite by id
-  Future<Favorite?> getFavoriteById(String id) async =>
+  Future<bool> getFavoriteById(String id) async =>
       await _databaseHelper.getFavoriteById(id);
 
   // Database add Favorite
-  Future<void> addFavorite(DetailRestaurant restaurant) async {
-    final favorite = Favorite(
-      id: restaurant.id,
-      pictureId: restaurant.pictureId,
-      name: restaurant.name,
-      city: restaurant.city,
-      rating: restaurant.rating,
-    );
+  void addFavorite(Favorite favorite) async {
     await _databaseHelper.addFavorite(favorite);
     _getFavorites();
   }
@@ -130,6 +143,7 @@ class Repository with ChangeNotifier {
   // Database delete Favorite
   void removeFavorite(String id) async {
     await _databaseHelper.removeFavorite(id);
+    notifyListeners();
     _getFavorites();
   }
 }

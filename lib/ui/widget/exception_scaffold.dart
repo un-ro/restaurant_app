@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/data/repository_provider.dart';
+import 'package:restaurant_app/data/provider/repository_provider.dart';
 import 'package:restaurant_app/ui/widget/component.dart';
 
 import 'exception_card.dart';

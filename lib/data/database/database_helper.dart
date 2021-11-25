@@ -39,10 +39,10 @@ class DatabaseHelper {
   }
 
   // Add Favorite
-  Future<void> addFavorite(Favorite favorite) async {
+  Future<int> addFavorite(Favorite favorite) async {
     final Database db = await database;
-    await db.insert(_tableName, favorite.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert(_tableName, favorite.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
   // Get Favorite
@@ -54,7 +54,7 @@ class DatabaseHelper {
   }
 
   // Get by Id Favorite
-  Future<Favorite?> getFavoriteById(String id) async {
+  Future<bool> getFavoriteById(String id) async {
     final Database db = await database;
     List<Map<String, dynamic>> result = await db.query(
       _tableName,
@@ -63,20 +63,15 @@ class DatabaseHelper {
     );
 
     if (result.isEmpty) {
-      return null;
+      return false;
     } else {
-      return result.map((fav) => Favorite.fromMap(fav)).first;
+      return true;
     }
   }
 
   // Delete Favorite
-  Future<void> removeFavorite(String id) async {
+  Future<int> removeFavorite(String id) async {
     final Database db = await database;
-
-    await db.delete(
-      _tableName,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
   }
 }

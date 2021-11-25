@@ -3,12 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant_app/data/model/response_list.dart';
-import 'package:restaurant_app/data/repository_provider.dart';
+import 'package:restaurant_app/data/provider/repository_provider.dart';
+import 'package:restaurant_app/ui/widget/component.dart';
 import 'package:restaurant_app/ui/widget/exception_card.dart';
 
 import 'widget/home_card.dart';
 
 class SearchPage extends StatefulWidget {
+  static const routeName = '/search';
   const SearchPage({Key? key}) : super(key: key);
 
   @override
@@ -34,71 +36,74 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          _buildSearchBar(context),
-          Consumer<Repository>(
-            builder: (context, provider, _) {
-              if (_isSearching) {
-                if (provider.state == APIState.LOADING) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (provider.state == APIState.DONE) {
-                  return Expanded(
-                    child:
-                        _buildList(context, provider.searchResult.restaurants),
-                  );
-                } else if (provider.state == APIState.EMPTY) {
-                  return ExceptionCard(
-                    assetPath: 'assets/lottie/empty-box.json',
-                    message: provider.message,
-                  );
-                } else if (provider.state == APIState.ERROR) {
-                  return ExceptionCard(
-                    assetPath: 'assets/lottie/error-cone.json',
-                    message: provider.message,
-                  );
+    return Scaffold(
+      appBar: defaultAppBar,
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            _buildSearchBar(context),
+            Consumer<Repository>(
+              builder: (context, provider, _) {
+                if (_isSearching) {
+                  switch (provider.searchState) {
+                    case APIState.LOADING:
+                      return Center(child: CircularProgressIndicator());
+                    case APIState.EMPTY:
+                      return ExceptionCard(
+                        assetPath: 'assets/lottie/empty-box.json',
+                        message: provider.message,
+                      );
+                    case APIState.ERROR:
+                      return ExceptionCard(
+                        assetPath: 'assets/lottie/error-cone.json',
+                        message: provider.message,
+                      );
+                    case APIState.DONE:
+                      return Expanded(
+                        child: _buildList(
+                            context, provider.searchResult.restaurants),
+                      );
+                  }
                 } else {
-                  return ExceptionCard(
-                    assetPath: 'assets/lottie/error-cone.json',
-                    message: 'Search',
+                  return Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          'assets/lottie/error-cone.json',
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.width * 0.8,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Start to search something',
+                          style: GoogleFonts.poppins(),
+                        )
+                      ],
+                    ),
                   );
                 }
-              } else {
-                return Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Lottie.asset(
-                        'assets/lottie/error-cone.json',
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: MediaQuery.of(context).size.width * 0.8,
-                      ),
-                      SizedBox(height: 10),
-                      Text('Start to search something', style: GoogleFonts.poppins(),)
-                    ],
-                  ),
-                );
-              }
-            },
-          )
-        ],
+              },
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
           Expanded(
             child: TextField(
               decoration: InputDecoration(
-                border: UnderlineInputBorder(),
+                border: OutlineInputBorder(),
                 hintText: 'Search...',
               ),
               controller: _searchController,

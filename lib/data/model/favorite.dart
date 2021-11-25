@@ -3,14 +3,12 @@ class Favorite {
   late String pictureId;
   late String name;
   late String city;
-  late String rating;
 
   Favorite({
     required this.id,
     required this.pictureId,
     required this.name,
     required this.city,
-    required this.rating,
   });
 
   Map<String, dynamic> toMap() {
@@ -19,7 +17,6 @@ class Favorite {
       'pictureId': pictureId,
       'name': name,
       'city': city,
-      'rating': rating,
     };
   }
 
@@ -28,6 +25,5 @@ class Favorite {
     pictureId = map['pictureId'];
     name = map['name'];
     city = map['city'];
-    rating = map['rating'];
   }
 }

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant_app/data/model/favorite.dart';
 import 'package:restaurant_app/data/model/response_model.dart';
-import 'package:restaurant_app/data/repository_provider.dart';
+import 'package:restaurant_app/data/provider/repository_provider.dart';
 import 'package:restaurant_app/ui/widget/detail_section.dart';
 import 'package:restaurant_app/ui/widget/exception_scaffold.dart';
 import 'package:restaurant_app/ui/widget/menu_grid.dart';
-import 'package:restaurant_app/utils/const.dart';
-import 'package:restaurant_app/utils/theme.dart';
 
 import 'widget/component.dart';
 
 class DetailPage extends StatefulWidget {
+  static final routeName = '/detail';
   final String restaurantId;
 
   const DetailPage({required this.restaurantId});
@@ -23,20 +23,6 @@ class _DetailPageState extends State<DetailPage> {
   bool _isFavorite = false;
   int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<Repository>(context, listen: false)
-        .getFavoriteById(widget.restaurantId)
-        .then((value) {
-      if (value != null) {
-        setState(() {
-          _isFavorite = true;
-        });
-      }
-    });
-  }
-
   Widget _listWidget(BuildContext context, DetailRestaurant restaurant) {
     final _list = <Widget>[
       DetailSection(restaurant: restaurant),
@@ -47,57 +33,100 @@ class _DetailPageState extends State<DetailPage> {
     return _list.elementAt(_selectedIndex);
   }
 
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<Repository>(context, listen: false)
+        .getFavoriteById(widget.restaurantId)
+        .then((value) {
+      setState(() {
+        _isFavorite = value;
+      });
+    });
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void _setFavorite(bool value) {
+    setState(() {
+      _isFavorite = value;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<Repository>(
-      builder: (context, provider, _) {
-        if (provider.state == APIState.LOADING) {
-          return ExceptionScaffold(state: provider.state);
-        } else if (provider.state == APIState.DONE) {
-          final restaurant = provider.detailResult.restaurant;
-          return _buildDetailPage(context, restaurant);
-        } else if (provider.state == APIState.ERROR) {
-          return ExceptionScaffold(
-            state: provider.state,
-            message: provider.message,
-          );
-        } else {
-          return Container();
-        }
-      },
+    return ChangeNotifierProvider(
+      create: (_) => Repository().fetchDetail(widget.restaurantId),
+      child: Container(
+        child: Consumer<Repository>(
+          builder: (context, provider, _) {
+            switch (provider.detailState) {
+              case APIState.LOADING:
+                return ExceptionScaffold(state: provider.detailState);
+              case APIState.EMPTY:
+                return ExceptionScaffold(state: provider.detailState);
+              case APIState.ERROR:
+                return ExceptionScaffold(
+                  state: provider.detailState,
+                  message: provider.message,
+                );
+              case APIState.DONE:
+                final restaurant = provider.detailResult.restaurant;
+                return _buildDetailPage(context, provider, restaurant);
+            }
+          },
+        ),
+      ),
     );
   }
 
-  Widget _buildDetailPage(BuildContext context, DetailRestaurant restaurant) {
+  Widget _buildDetailPage(
+    BuildContext context,
+    Repository provider,
+    DetailRestaurant restaurant,
+  ) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(APP_NAME, style: appTitleStyle),
-        actions: [
-          IconButton(
-            icon: _isFavorite
-                ? Icon(Icons.favorite_rounded, color: Colors.red)
-                : Icon(Icons.favorite_border_rounded),
-            onPressed: () => _onFavorite(context, restaurant),
-          ),
-        ],
-      ),
+      appBar: defaultAppBar,
       body: _listWidget(context, restaurant),
       bottomNavigationBar: BottomNavigationBar(
         items: detailBottomNav,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: Colors.green,
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: _isFavorite
+            ? Icon(
+                Icons.favorite_rounded,
+                color: Colors.white,
+              )
+            : Icon(
+                Icons.favorite_border_rounded,
+                color: Colors.white,
+              ),
+        onPressed: () {
+          if (_isFavorite) {
+            provider.removeFavorite(widget.restaurantId);
+            setState(() {
+              _isFavorite = !_isFavorite;
+            });
+          } else {
+            final favorite = Favorite(
+              id: restaurant.id,
+              pictureId: restaurant.pictureId,
+              name: restaurant.name,
+              city: restaurant.city,
+            );
+            provider.addFavorite(favorite);
+            setState(() {
+              _isFavorite = !_isFavorite;
+            });
+          }
+        },
       ),
     );
   }
@@ -116,20 +145,5 @@ class _DetailPageState extends State<DetailPage> {
         );
       },
     );
-  }
-
-  void _onFavorite(BuildContext context, DetailRestaurant restaurant) {
-    if (_isFavorite) {
-      // If true -> remove
-      Provider.of<Repository>(context, listen: false)
-          .removeFavorite(widget.restaurantId);
-    } else {
-      // If false -> add
-      Provider.of<Repository>(context, listen: false).addFavorite(restaurant);
-    }
-    // Draw again page.
-    setState(() {
-      _isFavorite = !_isFavorite;
-    });
   }
 }

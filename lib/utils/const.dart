@@ -10,4 +10,4 @@ const String LARGE_IMAGE = '$BASE_URL/images/large/';
 const String ERROR_RESPONSE =
     'Something went wrong, check your internet connection';
 const String EMPTY_RESPONSE =
-    'Empty Result from server, check again your search';
+    'Empty Result from server, check again your keyword';
