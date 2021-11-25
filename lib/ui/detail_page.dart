@@ -90,7 +90,15 @@ class _DetailPageState extends State<DetailPage> {
     DetailRestaurant restaurant,
   ) {
     return Scaffold(
-      appBar: defaultAppBar,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_rounded),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: Text('Restaurant Detail'),
+      ),
       body: _listWidget(context, restaurant),
       bottomNavigationBar: BottomNavigationBar(
         items: detailBottomNav,
