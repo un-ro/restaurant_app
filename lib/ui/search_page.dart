@@ -1,79 +1,122 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant_app/data/model/response_list.dart';
-import 'package:restaurant_app/provider/restaurant_provider.dart';
+import 'package:restaurant_app/data/provider/repository_provider.dart';
+import 'package:restaurant_app/ui/widget/component.dart';
 import 'package:restaurant_app/ui/widget/exception_card.dart';
 
 import 'widget/home_card.dart';
 
-class SearchPage extends StatelessWidget {
+class SearchPage extends StatefulWidget {
+  static const routeName = '/search';
   const SearchPage({Key? key}) : super(key: key);
 
   @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  final _searchController = TextEditingController();
+
+  bool _isSearching = false;
+
+  void setSearching(bool value) {
+    setState(() {
+      _isSearching = value;
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final _currentQuery = Provider.of<RestaurantProvider>(context).searchQuery;
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          _buildSearchBar(context),
-          Consumer<RestaurantProvider>(
-            builder: (context, state, _) {
-              if (state.searchState == APIState.Loading) {
-                return Center(child: CircularProgressIndicator());
-              } else if (state.searchState == APIState.HasData) {
-                return Expanded(
-                  child: _buildList(context, state.searchResult.restaurants),
-                );
-              } else if (state.searchState == APIState.NoData) {
-                return ExceptionCard(
-                  assetPath: 'assets/lottie/empty-box.json',
-                  message: state.message,
-                );
-              } else if (state.searchState == APIState.Error) {
-                return ExceptionCard(
-                  assetPath: 'assets/lottie/error-cone.json',
-                  message: state.message,
-                );
-              } else {
-                return ExceptionCard(
-                  assetPath: 'assets/lottie/error-cone.json',
-                  message: 'Search',
-                );
-              }
-            },
-          )
-        ],
+    return Scaffold(
+      appBar: defaultAppBar,
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            _buildSearchBar(context),
+            Consumer<Repository>(
+              builder: (context, provider, _) {
+                if (_isSearching) {
+                  switch (provider.searchState) {
+                    case APIState.LOADING:
+                      return Center(child: CircularProgressIndicator());
+                    case APIState.EMPTY:
+                      return ExceptionCard(
+                        assetPath: 'assets/lottie/empty-box.json',
+                        message: provider.message,
+                      );
+                    case APIState.ERROR:
+                      return ExceptionCard(
+                        assetPath: 'assets/lottie/error-cone.json',
+                        message: provider.message,
+                      );
+                    case APIState.DONE:
+                      return Expanded(
+                        child: _buildList(
+                            context, provider.searchResult.restaurants),
+                      );
+                  }
+                } else {
+                  return Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          'assets/lottie/error-cone.json',
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.width * 0.8,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Start to search something',
+                          style: GoogleFonts.poppins(),
+                        )
+                      ],
+                    ),
+                  );
+                }
+              },
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSearchBar(BuildContext context) {
-    final _currentQuery = Provider.of<RestaurantProvider>(context).searchQuery;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
           Expanded(
             child: TextField(
               decoration: InputDecoration(
-                border: UnderlineInputBorder(),
+                border: OutlineInputBorder(),
                 hintText: 'Search...',
               ),
-              onChanged: (query) {
-                Provider.of<RestaurantProvider>(context, listen: false)
-                    .setQuery(query);
-              },
+              controller: _searchController,
             ),
           ),
           IconButton(
             icon: Icon(Icons.search_rounded),
             onPressed: () {
-              if (_currentQuery.isNotEmpty) {
-                Provider.of<RestaurantProvider>(context, listen: false)
-                    .fetchSearch();
+              final query = _searchController.text;
+              if (query.isNotEmpty) {
+                Provider.of<Repository>(context, listen: false)
+                    .fetchSearch(query);
+                setSearching(true);
               }
             },
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:restaurant_app/common/navigation.dart';
 import 'package:restaurant_app/data/model/response_model.dart';
-import 'package:restaurant_app/provider/restaurant_provider.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
 import 'package:restaurant_app/utils/const.dart';
 import 'package:restaurant_app/utils/theme.dart';
@@ -82,14 +81,7 @@ class HomeCard extends StatelessWidget {
             ],
           ),
           onTap: () {
-            Provider.of<RestaurantProvider>(context, listen: false)
-                .fetchRestaurant(restaurant.id);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DetailPage(restaurantId: restaurant.id),
-              ),
-            );
+            Navigation.intentWithData(DetailPage.routeName, restaurant.id);
           },
         ),
       );

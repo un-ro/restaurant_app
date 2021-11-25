@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/data/model/response_detail.dart';
+import 'package:restaurant_app/utils/const.dart';
 import 'package:restaurant_app/utils/theme.dart';
 
 class DetailSection extends StatelessWidget {
@@ -18,6 +20,12 @@ class DetailSection extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
+            CachedNetworkImage(
+              imageUrl: MEDIUM_IMAGE + restaurant.pictureId,
+              fit: BoxFit.fitWidth,
+              height: 200,
+              width: MediaQuery.of(context).size.width,
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
