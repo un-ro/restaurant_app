@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
 class ExceptionCard extends StatelessWidget {
@@ -12,17 +13,21 @@ class ExceptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Lottie.asset(
-            assetPath,
-            height: 200.0,
-            width: 200.0,
-          ),
-          Text(message)
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Lottie.asset(
+          assetPath,
+          height: MediaQuery.of(context).size.height / 4,
+          width: MediaQuery.of(context).size.width / 2,
+        ),
+        Text(
+          message,
+          style: GoogleFonts.poppins().copyWith(fontWeight: FontWeight.bold),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        )
+      ],
     );
   }
 }
